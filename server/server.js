@@ -4,7 +4,7 @@ const express = require('express');
 const socketIO = require('socket.io');
 
 //custom modules
-const {generateMessage} = require('./utils/message');
+const {generateMessage, generateLocationMessage} = require('./utils/message');
 
 
 const publicPath = path.join(__dirname, '../public');
@@ -19,6 +19,8 @@ app.use(express.static(publicPath));
 //register an event listner!!
 io.on('connection', (socket) => { //client connected to the server.
   console.log("user connected");
+
+
   socket.on('disconnect', (socket) => {
     console.log("client disconnected");
   });
@@ -31,38 +33,13 @@ io.on('connection', (socket) => { //client connected to the server.
   socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user joined'));
 
 
-  // socket.emit('newMessage', {
-  //   from: "John",
-  //   text: "see you then",
-  //   createdAt: 123123
-  // })
-
-  // socket.on('createMessage', (message, cb) => {
-  //   console.log('createMessage', message);
-  //   //im listening for the server to emit a message.
-  //
-  //   //then im emitting the message recieved to everyone.
-  //
-  //   //io emits to everyone - broadcasting.
-  //   io.emit('newMessage', generateMessage(message.from, message.text));
-  //   cb();
-  //   // socket.broadcast.emit('newMessage', {
-  //   //   from: message.from,
-  //   //   text: message.text,
-  //   //   createdAt: new Date().getTime()
-  //   //
-  //   // });
-  //
-  // });
   socket.on('createMessage', (message, callback) => {
     console.log('createMessage', message);
     io.emit('newMessage', generateMessage(message.from, message.text));
     callback('This is from the server.');
-    // socket.broadcast.emit('newMessage', {
-    //   from: message.from,
-    //   text: message.text,
-    //   createdAt: new Date().getTime()
-    // });
+  });
+  socket.on('createLocationMessage', (coords) => {
+    io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude, coords.longitude));
   });
 
 
